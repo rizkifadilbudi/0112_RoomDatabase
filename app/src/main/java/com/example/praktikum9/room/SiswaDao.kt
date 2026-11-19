@@ -1,10 +1,12 @@
 package com.example.praktikum9.room
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import androidx.room.OnConflictStrategy
+import androidx.room.Update
 
 @Dao
 interface SiswaDao {
@@ -13,4 +15,11 @@ interface SiswaDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(siswa : Siswa)
+
+    @Query("SELECT * FROM tblSiswa WHERE id = :id")
+    fun getSiswa(id: Int): Flow<Siswa>
+
+
+
+
 }
