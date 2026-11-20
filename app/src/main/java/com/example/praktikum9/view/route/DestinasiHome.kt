@@ -1,4 +1,5 @@
-package com.example.praktikum9.uicontroller
+package com.example.praktikum9.view.route
+
 import com.example.praktikum9.R
 
 object DestinasiHome : DestinasiNavigasi {
