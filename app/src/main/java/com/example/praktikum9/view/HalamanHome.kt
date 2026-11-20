@@ -1,5 +1,6 @@
 package com.example.praktikum9.view
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,19 +35,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.praktikum9.R
 import com.example.praktikum9.room.Siswa
-import com.example.praktikum9.uicontroller.DestinasiHome
-import com.example.praktikum9.uicontroller.DestinasiNavigasi
-import com.example.praktikum9.uicontroller.SiswaTopAppBar
+import com.example.praktikum9.view.route.DestinasiHome
+import com.example.praktikum9.view.uicontroller.SiswaTopAppBar
 import com.example.praktikum9.viewmodel.HomeViewModel
-import com.example.praktikum9.viewmodel.PenyediaViewModel
+import com.example.praktikum9.viewmodel.provider.PenyediaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navigateToItemEntry: () -> Unit,
+    // edit 1 : tambahkan parameter navigateToItemUpdate
+    navigateToItemUpdate: (Int) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel(factory = PenyediaViewModel.Factory)
-){
+) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
@@ -70,11 +72,12 @@ fun HomeScreen(
                 )
             }
         },
-    ){
-            innerPadding ->
+    ) { innerPadding ->
         val uiStateSiswa by viewModel.homeUiState.collectAsState()
         BodyHome(
             itemSiswa = uiStateSiswa.listSiswa,
+            // edit 2 : tambahkan event onSiswaClick
+            onSiswaClick = navigateToItemUpdate,
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
@@ -85,11 +88,14 @@ fun HomeScreen(
 @Composable
 fun BodyHome(
     itemSiswa: List<Siswa>,
-    modifier: Modifier=Modifier){
+    // edit 3 : tambahkan parameter onSiswaClick
+    onSiswaClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
-    ){
+    ) {
         if (itemSiswa.isEmpty()) {
             Text(
                 text = stringResource(R.string.deskripsi_no_item),
@@ -99,8 +105,9 @@ fun BodyHome(
         } else {
             ListSiswa(
                 itemSiswa = itemSiswa,
-                modifier = Modifier.padding(horizontal =
-                    dimensionResource(id = R.dimen.padding_small))
+                // edit 4 : tambahkan event onSiswaClick
+                onSiswaClick = { onSiswaClick(it.id) },
+                modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
             )
         }
     }
@@ -108,16 +115,19 @@ fun BodyHome(
 
 @Composable
 fun ListSiswa(
-    itemSiswa : List<Siswa>,
-    modifier: Modifier=Modifier
-){
-    LazyColumn(modifier = Modifier){
-        items(items = itemSiswa, key = {it.id}){
-                person ->
+    itemSiswa: List<Siswa>,
+    // edit 5 : tambahkan parameter onSiswaClick
+    onSiswaClick: (Siswa) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(modifier = modifier) {
+        items(items = itemSiswa, key = { it.id }) { person ->
             DataSiswa(
                 siswa = person,
                 modifier = Modifier
                     .padding(dimensionResource(id = R.dimen.padding_small))
+                    // edit 6 : tambahkan modifier clickable
+                    .clickable { onSiswaClick(person) }
             )
         }
     }
@@ -127,26 +137,25 @@ fun ListSiswa(
 fun DataSiswa(
     siswa: Siswa,
     modifier: Modifier = Modifier
-){
+) {
     Card(
         modifier = modifier,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ){
+    ) {
         Column(
             modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_large)),
-            verticalArrangement =
-                Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small))
-        ){
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small))
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth()
-            ){
+            ) {
                 Text(
                     text = siswa.nama,
                     style = MaterialTheme.typography.titleLarge,
                 )
                 Spacer(Modifier.weight(1f))
                 Icon(
-                    imageVector = Icons.Default.Phone ,
+                    imageVector = Icons.Default.Phone,
                     contentDescription = null,
                 )
                 Text(
